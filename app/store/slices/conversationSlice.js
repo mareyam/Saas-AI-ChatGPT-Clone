@@ -74,7 +74,52 @@ export const deleteConversation = createAsyncThunk(
   }
 );
 
-// The slice
+export const editConversationTitle = createAsyncThunk(
+  'conversation/editConversation',
+  async ({ id, newTitle }, thunkAPI) => {
+    const res = await fetch(BASE_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: id, title: newTitle }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      return thunkAPI.rejectWithValue(errorData);
+    }
+
+    const data = await res.json();
+    thunkAPI.dispatch(fetchConversations()); // Refresh the list
+    return data;
+  }
+);
+
+// export const editConversationTitle = createAsyncThunk(
+//   'conversation/editConversation',
+//   async ({ oldTitle, newTitle }, thunkAPI) => {
+//     const res = await fetch(
+//       `${BASE_URL}?title=${encodeURIComponent(oldTitle)}`,
+//       {
+//         method: 'PATCH',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ title: newTitle }),
+//       }
+//     );
+
+//     if (!res.ok) {
+//       const errorData = await res.json();
+//       return thunkAPI.rejectWithValue(errorData);
+//     }
+
+//     const data = await res.json();
+//     thunkAPI.dispatch(fetchConversations()); // Refresh the list of conversations
+//     return data;
+//   }
+// );
 
 const conversationSlice = createSlice({
   name: 'conversation',
@@ -183,151 +228,3 @@ const conversationSlice = createSlice({
 
 export const { setMsg, setCurrConvo, clearError } = conversationSlice.actions;
 export default conversationSlice.reducer;
-
-// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-// const BASE_URL = '/api/conversations';
-
-// // Thunks
-// export const fetchConversations = createAsyncThunk(
-//   'conversation/fetchAll',
-//   async () => {
-//     const res = await fetch(BASE_URL);
-//     return await res.json();
-//   }
-// );
-
-// export const fetchConversationByTitle = createAsyncThunk(
-//   'conversation/fetchByTitle',
-//   async (title) => {
-//     const res = await fetch(`${BASE_URL}?title=${title}`);
-//     return await res.json();
-//   }
-// );
-
-// export const createConversation = createAsyncThunk(
-//   'conversation/create',
-//   async ({ title, messages }, thunkAPI) => {
-//     const res = await fetch(BASE_URL, {
-//       method: 'POST',
-//       body: JSON.stringify({ title, messages }),
-//       headers: { 'Content-Type': 'application/json' },
-//     });
-//     const data = await res.json();
-//     thunkAPI.dispatch(fetchConversations());
-//     return data;
-//   }
-// );
-
-// export const addMessagesToConversation = createAsyncThunk(
-//   'conversation/addMessages',
-//   async ({ title, messages }, thunkAPI) => {
-//     const res = await fetch(BASE_URL, {
-//       method: 'PUT',
-//       body: JSON.stringify({ title, messages }),
-//       headers: { 'Content-Type': 'application/json' },
-//     });
-//     const data = await res.json();
-//     thunkAPI.dispatch(fetchConversations());
-//     return data;
-//   }
-// );
-
-// export const deleteConversation = createAsyncThunk(
-//   'conversation/delete',
-//   async (title, thunkAPI) => {
-//     const res = await fetch(`${BASE_URL}?title=${title}`, {
-//       method: 'DELETE',
-//     });
-//     const data = await res.json();
-//     thunkAPI.dispatch(fetchConversations());
-//     return data;
-//   }
-// );
-
-// const conversationSlice = createSlice({
-//   name: 'conversation',
-//   initialState: {
-//     conversations: [],
-//     selectedConversation: null,
-//     msg: null,
-//     currConvo: null,
-//     loading: false,
-//     error: null,
-//   },
-//   reducers: {
-//     setMsg: (state, action) => {
-//       state.msg = action.payload;
-//     },
-//     setCurrConvo: (state, action) => {
-//       state.currConvo = action.payload;
-//     },
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(fetchConversations.pending, (state) => {
-//         state.loading = true;
-//         state.error = null;
-//       })
-//       .addCase(fetchConversations.fulfilled, (state, action) => {
-//         state.conversations = action.payload;
-//         state.loading = false;
-//       })
-//       .addCase(fetchConversations.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.error;
-//       })
-
-//       .addCase(fetchConversationByTitle.fulfilled, (state, action) => {
-//         state.selectedConversation = action.payload;
-//       })
-
-//       .addCase(createConversation.rejected, (state, action) => {
-//         state.error = action.error;
-//       })
-
-//       .addCase(addMessagesToConversation.rejected, (state, action) => {
-//         state.error = action.error;
-//       })
-
-//       .addCase(deleteConversation.rejected, (state, action) => {
-//         state.error = action.error;
-//       });
-//   },
-// });
-
-// export const { setMsg, setCurrConvo } = conversationSlice.actions;
-// export default conversationSlice.reducer;
-
-// // import { createSlice } from '@reduxjs/toolkit';
-
-// // const initialState = {
-// //   conversations: [], // Array of { id, title, messages: [] }
-// // };
-
-// // const conversationSlice = createSlice({
-// //   name: 'conversation',
-// //   initialState,
-// //   reducers: {
-// //     addConversation: (state, action) => {
-// //       const { id, title } = action.payload;
-// //       state.conversations.push({ id, title, messages: [] });
-// //     },
-// //     addMessageToConversation: (state, action) => {
-// //       const { id, message } = action.payload;
-// //       const convo = state.conversations.find((c) => c.id === id);
-// //       if (convo) {
-// //         convo.messages.push(message);
-// //       }
-// //     },
-// //     deleteConversation: (state, action) => {
-// //       state.conversations = state.conversations.filter(
-// //         (c) => c.id !== action.payload
-// //       );
-// //     },
-// //   },
-// // });
-
-// // export const { addConversation, addMessageToConversation, deleteConversation } =
-// //   conversationSlice.actions;
-// // export default conversationSlice.reducer;

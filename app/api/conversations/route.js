@@ -3,7 +3,6 @@
 let conversations = []; // In-memory store
 
 export async function GET(request) {
-  console.log('GET');
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title');
 
@@ -50,25 +49,28 @@ export async function POST(request) {
   return new Response(JSON.stringify(newConversation), { status: 201 });
 }
 
-// PUT: Add new messages to an existing conversation by title
 export async function PUT(request) {
-  const { title, messages } = await request.json();
+  const { id, title, messages } = await request.json();
+  console.log('in put is', id, title);
 
-  if (!title || !Array.isArray(messages) || messages.length === 0) {
+  if (!id) {
     return new Response(
-      JSON.stringify({ error: 'Title and messages are required' }),
+      JSON.stringify({ error: 'Conversation ID is required' }),
       { status: 400 }
     );
   }
 
-  const conversation = conversations.find((c) => c.title === title);
+  const conversation = conversations.find((c) => c.id === id);
   if (!conversation) {
     return new Response(JSON.stringify({ error: 'Conversation not found' }), {
       status: 404,
     });
   }
 
-  conversation.messages.push(...messages);
+  if (title) conversation.title = title;
+  if (Array.isArray(messages) && messages.length > 0) {
+    conversation.messages.push(...messages); // Append new messages
+  }
 
   return new Response(
     JSON.stringify({ message: 'Conversation updated', conversation }),
@@ -76,7 +78,6 @@ export async function PUT(request) {
   );
 }
 
-// DELETE: delete by title
 export async function DELETE(request) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title');

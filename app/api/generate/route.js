@@ -26,7 +26,6 @@ export async function POST(request) {
 }
 
 export async function POSTImage(request) {
-  console.log('POSTImage called');
   try {
     const { prompt, image } = await request.json();
 

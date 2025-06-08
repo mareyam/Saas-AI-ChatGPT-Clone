@@ -9,7 +9,7 @@ import ImageModal from "./image-modal";
 
 export function ChatMessage({ message }) {
     const [openImageModal, setOpenImageModal] = useState(false);
-    console.log("message is", message)
+    // console.log("message is", message)
     const isUser = message.role === 'user';
 
     return (
@@ -42,7 +42,7 @@ export function ChatMessage({ message }) {
                     </Card>
 
                     <time className="text-xs text-muted-foreground px-1">
-                        {message.timestamp.toLocaleTimeString([], {
+                        {message?.timestamp?.toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit'
                         })}
