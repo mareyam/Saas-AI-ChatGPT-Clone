@@ -4,6 +4,18 @@ const BASE_URL = '/api/conversations';
 
 // Thunks for async actions
 
+export const fetchConversationById = createAsyncThunk(
+  'conversation/fetchConversationById',
+  async (id, thunkAPI) => {
+    const res = await fetch(`${BASE_URL}?id=${id}`);
+    if (!res.ok) {
+      const errorData = await res.json();
+      return thunkAPI.rejectWithValue(errorData);
+    }
+    return await res.json();
+  }
+);
+
 export const fetchConversations = createAsyncThunk(
   'conversation/fetchConversations',
   async () => {
@@ -42,8 +54,8 @@ export const createConversation = createAsyncThunk(
 
 export const addMessagesToConversation = createAsyncThunk(
   'conversation/addMessagesToConversation',
-  async ({ title, messages }, thunkAPI) => {
-    const res = await fetch(BASE_URL, {
+  async ({ id, title, messages }, thunkAPI) => {
+    const res = await fetch(`${BASE_URL}?id=${id}`, {
       method: 'PUT',
       body: JSON.stringify({ title, messages }),
       headers: { 'Content-Type': 'application/json' },
@@ -60,8 +72,8 @@ export const addMessagesToConversation = createAsyncThunk(
 
 export const deleteConversation = createAsyncThunk(
   'conversation/deleteConversation',
-  async (title, thunkAPI) => {
-    const res = await fetch(`${BASE_URL}?title=${encodeURIComponent(title)}`, {
+  async (id, thunkAPI) => {
+    const res = await fetch(`${BASE_URL}?id=${id}`, {
       method: 'DELETE',
     });
     if (!res.ok) {
@@ -77,12 +89,12 @@ export const deleteConversation = createAsyncThunk(
 export const editConversationTitle = createAsyncThunk(
   'conversation/editConversation',
   async ({ id, newTitle }, thunkAPI) => {
-    const res = await fetch(BASE_URL, {
+    const res = await fetch(`${BASE_URL}?id=${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id: id, title: newTitle }),
+      body: JSON.stringify({ title: newTitle }),
     });
 
     if (!res.ok) {
@@ -95,32 +107,6 @@ export const editConversationTitle = createAsyncThunk(
     return data;
   }
 );
-
-// export const editConversationTitle = createAsyncThunk(
-//   'conversation/editConversation',
-//   async ({ oldTitle, newTitle }, thunkAPI) => {
-//     const res = await fetch(
-//       `${BASE_URL}?title=${encodeURIComponent(oldTitle)}`,
-//       {
-//         method: 'PATCH',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({ title: newTitle }),
-//       }
-//     );
-
-//     if (!res.ok) {
-//       const errorData = await res.json();
-//       return thunkAPI.rejectWithValue(errorData);
-//     }
-
-//     const data = await res.json();
-//     thunkAPI.dispatch(fetchConversations()); // Refresh the list of conversations
-//     return data;
-//   }
-// );
-
 const conversationSlice = createSlice({
   name: 'conversation',
   initialState: {
@@ -222,6 +208,9 @@ const conversationSlice = createSlice({
           action.payload?.error ||
           action.error.message ||
           'Failed to delete conversation';
+      })
+      .addCase(fetchConversationById.fulfilled, (state, action) => {
+        state.selectedConversation = action.payload;
       });
   },
 });

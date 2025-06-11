@@ -42,10 +42,10 @@ export function ChatMessage({ message }) {
                     </Card>
 
                     <time className="text-xs text-muted-foreground px-1">
-                        {message?.timestamp?.toLocaleTimeString([], {
+                        {/* {message?.timestamp?.toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit'
-                        })}
+                        })} */}
                     </time>
                 </div>
             </div>

@@ -31,6 +31,7 @@ import {
     fetchConversations,
     fetchConversationByTitle,
     setCurrConvo,
+    fetchConversationById,
 } from "@/app/store/slices/conversationSlice"
 
 export function AppSidebar(props) {
@@ -43,8 +44,9 @@ export function AppSidebar(props) {
 
     // Map conversations to nav items
     const conversationItems = conversations?.map((item) => ({
+        id: item.id,
         title: item.title,
-        url: "#",
+        messages: item.messages,
     }))
 
     const navMain = [
@@ -143,9 +145,9 @@ export function AppSidebar(props) {
         },
     ]
     // Handler for selecting a conversation
-    const handleSelectConversation = (title) => {
-        dispatch(setCurrConvo(title))
-        dispatch(fetchConversationByTitle(title))
+    const handleSelectConversation = (id) => {
+        dispatch(setCurrConvo(id))
+        dispatch(fetchConversationById(id))
     }
 
     return (

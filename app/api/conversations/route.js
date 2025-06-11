@@ -1,13 +1,30 @@
-// app/api/conversations/route.js
-
-let conversations = []; // In-memory store
+let conversations = [];
+// {
+//   id: '1',
+//   title: 'c1',
+//   messages: [
+//     {
+//       role: 'user',
+//       content: 'New message content',
+//     },
+//   ],
+// },
+// {
+//   id: '2',
+//   title: 'c2',
+//   messages: [
+//     {
+//       role: 'user',
+//       content: 'New message content 2',
+//     },
+//   ],
+// },
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get('title');
-
-  if (title) {
-    const conversation = conversations.find((c) => c.title === title);
+  const id = searchParams.get('id');
+  if (id) {
+    const conversation = conversations.find((c) => c.id === id);
     if (!conversation) {
       return new Response(JSON.stringify({ error: 'Conversation not found' }), {
         status: 404,
@@ -16,11 +33,9 @@ export async function GET(request) {
     return new Response(JSON.stringify(conversation), { status: 200 });
   }
 
-  // If no title query, return all
   return new Response(JSON.stringify(conversations), { status: 200 });
 }
 
-// POST: Create new conversation with title + first messages
 export async function POST(request) {
   const { title, messages } = await request.json();
 
@@ -28,14 +43,6 @@ export async function POST(request) {
     return new Response(
       JSON.stringify({ error: 'Title and at least one message is required' }),
       { status: 400 }
-    );
-  }
-
-  const exists = conversations.find((c) => c.title === title);
-  if (exists) {
-    return new Response(
-      JSON.stringify({ error: 'Conversation with this title already exists' }),
-      { status: 409 }
     );
   }
 
@@ -49,46 +56,89 @@ export async function POST(request) {
   return new Response(JSON.stringify(newConversation), { status: 201 });
 }
 
-export async function PUT(request) {
-  const { id, title, messages } = await request.json();
-  console.log('in put is', id, title);
+// export async function PUT(request) {
+//   const { searchParams } = new URL(request.url);
+//   const idFromUrl = searchParams.get('id'); // Get id from URL
+//   const { title, messages } = await request.json();
 
-  if (!id) {
-    return new Response(
-      JSON.stringify({ error: 'Conversation ID is required' }),
-      { status: 400 }
-    );
+//   if (!idFromUrl) {
+//     return new Response(JSON.stringify({ error: 'ID is required' }), {
+//       status: 400,
+//     });
+//   }
+
+//   const index = conversations.findIndex((c) => c.id === idFromUrl);
+//   if (index === -1) {
+//     return new Response(JSON.stringify({ error: 'Conversation not found' }), {
+//       status: 404,
+//     });
+//   }
+
+//   if (title) {
+//     conversations[index].title = title;
+//   }
+
+//   if (Array.isArray(messages)) {
+//     conversations[index].messages.push(...messages);
+//   }
+
+//   return new Response(
+//     JSON.stringify({
+//       message: 'Updated',
+//       conversation: conversations[index],
+//     }),
+//     { status: 200 }
+//   );
+// }
+
+export async function PUT(request) {
+  const { searchParams } = new URL(request.url);
+  const idFromUrl = searchParams.get('id');
+  const { title, messages } = await request.json();
+
+  if (!idFromUrl) {
+    return new Response(JSON.stringify({ error: 'ID is required' }), {
+      status: 400,
+    });
   }
 
-  const conversation = conversations.find((c) => c.id === id);
-  if (!conversation) {
+  const index = conversations.findIndex((c) => c.id === idFromUrl);
+  if (index === -1) {
     return new Response(JSON.stringify({ error: 'Conversation not found' }), {
       status: 404,
     });
   }
 
-  if (title) conversation.title = title;
+  // ✅ Update title if provided
+  if (typeof title === 'string' && title.trim() !== '') {
+    conversations[index].title = title.trim();
+  }
+
+  // ✅ Append messages if provided and valid
   if (Array.isArray(messages) && messages.length > 0) {
-    conversation.messages.push(...messages); // Append new messages
+    conversations[index].messages.push(...messages);
   }
 
   return new Response(
-    JSON.stringify({ message: 'Conversation updated', conversation }),
+    JSON.stringify({
+      message: 'Updated',
+      conversation: conversations[index],
+    }),
     { status: 200 }
   );
 }
 
 export async function DELETE(request) {
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get('title');
+  const id = searchParams.get('id');
 
-  if (!title) {
-    return new Response(JSON.stringify({ error: 'Title is required' }), {
+  if (!id) {
+    return new Response(JSON.stringify({ error: 'ID is required' }), {
       status: 400,
     });
   }
 
-  const index = conversations.findIndex((c) => c.title === title);
+  const index = conversations.findIndex((c) => c.id === id);
   if (index === -1) {
     return new Response(JSON.stringify({ error: 'Conversation not found' }), {
       status: 404,
@@ -96,7 +146,7 @@ export async function DELETE(request) {
   }
 
   conversations.splice(index, 1);
-  return new Response(JSON.stringify({ message: 'Conversation deleted' }), {
+  return new Response(JSON.stringify({ message: 'Deleted' }), {
     status: 200,
   });
 }

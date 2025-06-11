@@ -19,7 +19,6 @@ export function ChatGPTModelSelection() {
 
     if (loading) return <p>Loading models...</p>;
     if (error) return <p>Error loading models: {error}</p>;
-    // console.log("model-selection", selectedModel)
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>

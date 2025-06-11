@@ -121,7 +121,7 @@ const CustomGPT = ({ open, onClose }) => {
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="w-full h-[90vh]  border-2 border-red-500">
+            <DialogContent className="w-full h-[90vh]">
                 <DialogHeader>
                     <DialogTitle>{step === 1 ? "Configure your GPT" : "Configure GPT Parameters"}</DialogTitle>
                 </DialogHeader>
